@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Brain Battle – Cornell & Active Recall</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 0.8; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.02); }
+    }
+    .pulse-effect {
+      animation: pulse-glow 2s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center justify-center p-4 selection:bg-indigo-500 selection:text-white">
+
+  <!-- Main Container -->
+  <main class="w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden backdrop-blur-xl relative">
+    
+    <!-- Top Decoration Gradient -->
+    <div class="h-2 bg-gradient-to-r from-cyan-400 via-indigo-500 to-fuchsia-500"></div>
+
+    <!-- START SCREEN -->
+    <section id="start-screen" class="p-8 sm:p-12 text-center flex flex-col items-center">
+      <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 text-xs font-semibold mb-6 uppercase tracking-wider">
+        <span>⚡ Thử thách trí tuệ</span>
+      </div>
+      <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight bg-gradient-to-r from-cyan-300 via-indigo-200 to-fuchsia-300 bg-clip-text text-transparent mb-4">
+        BRAIN BATTLE
+      </h1>
+      <p class="text-slate-400 max-w-md mx-auto mb-8 text-sm sm:text-base leading-relaxed">
+        Chinh phục 10 câu hỏi qua 3 vòng đấu căng thẳng về phương pháp ghi chép <strong class="text-cyan-400">Cornell</strong> và kỹ thuật truy xuất <strong class="text-fuchsia-400">Active Recall</strong>!
+      </p>
+
+      <div class="grid grid-cols-3 gap-3 w-full mb-8 text-left">
+        <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-4 text-center">
+          <p class="text-xs text-slate-400 font-semibold mb-1">ROUND 1</p>
+          <p class="text-sm font-bold text-cyan-400">Khởi Động</p>
+          <span class="text-[11px] text-slate-500">15s / câu</span>
+        </div>
+        <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-4 text-center">
+          <p class="text-xs text-slate-400 font-semibold mb-1">ROUND 2</p>
+          <p class="text-sm font-bold text-indigo-400">Tư Duy</p>
+          <span class="text-[11px] text-slate-500">20s / câu</span>
+        </div>
+        <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-4 text-center">
+          <p class="text-xs text-slate-400 font-semibold mb-1">ROUND 3</p>
+          <p class="text-sm font-bold text-fuchsia-400">Chung Kết</p>
+          <span class="text-[11px] text-slate-500">20s / câu</span>
+        </div>
+      </div>
+
+      <button id="start-btn" class="w-full sm:w-auto px-8 py-3.5 bg-indigo-600 hover:bg-indigo-500 active:scale-95 transition-all text-white font-bold rounded-2xl shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2">
+        <span>Bắt đầu thi đấu</span>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+        </svg>
+      </button>
+    </section>
+
+    <!-- QUIZ PLAY SCREEN -->
+    <section id="quiz-screen" class="p-6 sm:p-8 hidden">
+      <!-- Status Header -->
+      <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+        <div>
+          <span id="round-badge" class="px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wide bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+            Round 1
+          </span>
+          <span id="question-progress" class="ml-2 text-xs text-slate-400 font-medium">Câu 1/10</span>
+        </div>
+        <div class="flex items-center gap-4">
+          <div class="flex items-center gap-1.5 text-amber-400 font-bold text-sm">
+            <span>⭐</span>
+            <span id="score-counter">0 điểm</span>
+          </div>
+          <div class="flex items-center gap-1 bg-slate-800 px-3 py-1 rounded-full border border-slate-700">
+            <span class="text-xs">⏱️</span>
+            <span id="timer-text" class="text-sm font-bold text-slate-200">15s</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Time Bar -->
+      <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mt-3 mb-6">
+        <div id="timer-progress" class="bg-cyan-400 h-full w-full transition-all duration-100 ease-linear"></div>
+      </div>
+
+      <!-- Question Text -->
+      <div class="mb-6">
+        <h2 id="question-text" class="text-lg sm:text-xl font-bold text-slate-100 leading-snug">
+          Nội dung câu hỏi sẽ hiển thị ở đây
+        </h2>
+      </div>
+
+      <!-- Options List -->
+      <div id="options-container" class="space-y-3 mb-6">
+        <!-- Buttons rendered via JS -->
+      </div>
+
+      <!-- Feedback Banner -->
+      <div id="feedback-card" class="p-4 rounded-2xl border hidden transition-all duration-300">
+        <p id="feedback-title" class="font-bold text-sm mb-1"></p>
+        <p id="feedback-desc" class="text-xs text-slate-300 leading-relaxed"></p>
+      </div>
+
+      <!-- Next Button Area -->
+      <div class="mt-6 flex justify-end">
+        <button id="next-btn" class="px-6 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl text-sm font-bold transition flex items-center gap-2 opacity-50 cursor-not-allowed" disabled>
+          <span>Câu tiếp theo</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      </div>
+    </section>
+
+    <!-- RESULT SCREEN -->
+    <section id="result-screen" class="p-8 sm:p-12 text-center hidden">
+      <div id="result-trophy" class="text-5xl mb-4">🏆</div>
+      <h2 class="text-3xl font-extrabold text-white mb-2">Hoàn Thành Thử Thách!</h2>
+      <p id="result-eval" class="text-sm text-slate-400 mb-6 max-w-sm mx-auto"></p>
+
+      <div class="grid grid-cols-2 gap-4 max-w-sm mx-auto mb-8">
+        <div class="bg-slate-800/80 border border-slate-700 rounded-2xl p-4">
+          <p class="text-xs text-slate-400 font-medium mb-1">Tổng điểm</p>
+          <p id="final-score" class="text-3xl font-black text-indigo-400">0</p>
+        </div>
+        <div class="bg-slate-800/80 border border-slate-700 rounded-2xl p-4">
+          <p class="text-xs text-slate-400 font-medium mb-1">Độ chính xác</p>
+          <p id="accuracy-rate" class="text-3xl font-black text-cyan-400">0%</p>
+        </div>
+      </div>
+
+      <button id="restart-btn" class="px-8 py-3.5 bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white font-bold rounded-2xl transition shadow-lg shadow-indigo-600/30">
+        Chơi lại từ đầu
+      </button>
+    </section>
+
+  </main>
+
+  <script>
+    const quizData = [
+      {
+        round: "Round 1 – Khởi Động",
+        roundTheme: "cyan",
+        timeLimit: 15,
+        question: "Câu 1. Phương pháp ghi chép Cornell gồm 3 khu vực chính nào?",
+        options: [
+          "Mở bài – Thân bài – Kết luận",
+          "Cột từ khóa – Khu vực ghi chép – Phần tổng kết",
+          "Tiêu đề – Đoạn văn – Tài liệu tham khảo",
+          "Câu hỏi – Câu trả lời – Ví dụ"
+        ],
+        correct: 1,
+        explanation: "Phương pháp Cornell chia trang giấy thành 3 phần rõ ràng: Cột từ khóa (Cue Column), Khu vực ghi chép chính (Note-taking Area) và Phần tổng kết (Summary)."
+      },
+      {
+        round: "Round 1 – Khởi Động",
+        roundTheme: "cyan",
+        timeLimit: 15,
+        question: "Câu 2. Mục đích chính của phương pháp Active Recall là gì?",
+        options: [
+          "Đọc đi đọc lại thông tin nhiều lần.",
+          "Tô sáng những thông tin quan trọng.",
+          "Chủ động truy xuất kiến thức từ trí nhớ.",
+          "Sao chép nội dung vào vở."
+        ],
+        correct: 2,
+        explanation: "Active Recall (Chủ động truy xuất) buộc não bộ phải vận động và lấy thông tin từ bên trong trí nhớ ra, thay vì đọc lại thụ động."
+      },
+      {
+        round: "Round 1 – Khởi Động",
+        roundTheme: "cyan",
+        timeLimit: 15,
+        question: "Câu 3. Khu vực nào trong phương pháp Cornell hữu ích nhất để tự kiểm tra khả năng ghi nhớ?",
+        options: [
+          "Cột từ khóa (Cue Column).",
+          "Khu vực ghi chép chính (Note-taking Area).",
+          "Phần tổng kết (Summary).",
+          "Tiêu đề trang."
+        ],
+        correct: 0,
+        explanation: "Cột từ khóa chứa câu hỏi và gợi ý chính. Người học có thể che phần ghi chép bên phải và dùng các từ khóa này để tự kiểm tra kiến thức."
+      },
+      {
+        round: "Round 2 – Tư Duy",
+        roundTheme: "indigo",
+        timeLimit: 20,
+        question: "Câu 4. Một sinh viên đọc đi đọc lại cùng một chương sách 5 lần nhưng vẫn không thể nhớ được nhiều khi đi thi. Bạn ấy nên làm gì?",
+        options: [
+          "Đọc chương sách thêm 10 lần nữa.",
+          "Tô sáng tất cả các câu trong tài liệu.",
+          "Đóng sách lại và cố gắng nhớ lại những ý chính.",
+          "Chép lại toàn bộ chương sách."
+        ],
+        correct: 2,
+        explanation: "Đóng sách lại và tự nhớ lại (Active Recall) kích thích các khớp thần kinh liên quan đến việc ghi nhớ lâu dài, khắc phục bẫy 'ảo tưởng về sự am hiểu'."
+      },
+      {
+        round: "Round 2 – Tư Duy",
+        roundTheme: "indigo",
+        timeLimit: 20,
+        question: "Câu 5. Sau khi kết thúc một buổi học, bạn nên làm gì để sử dụng phương pháp Cornell hiệu quả?",
+        options: [
+          "Bỏ qua phần ghi chép cho đến khi gần thi.",
+          "Xem lại ghi chép, tạo câu hỏi và tổng kết những ý chính.",
+          "Chép lại toàn bộ nội dung bài giảng.",
+          "Chỉ trang trí và tô màu cho vở ghi."
+        ],
+        correct: 1,
+        explanation: "Bước quan trọng của Cornell là ôn lại trong 24 giờ đầu: hoàn thiện cột từ khóa bằng các câu hỏi truy vấn và tóm tắt nội dung cốt lõi ở đáy trang."
+      },
+      {
+        round: "Round 2 – Tư Duy",
+        roundTheme: "indigo",
+        timeLimit: 20,
+        question: "Câu 6. Hành động nào sau đây là ví dụ điển hình nhất của phương pháp Active Recall?",
+        options: [
+          "Đọc sách giáo trình trước khi đi ngủ.",
+          "Nhìn lại những câu đã được tô sáng.",
+          "Che phần ghi chép và tự trả lời câu hỏi dựa trên trí nhớ.",
+          "Xem lại video bài giảng."
+        ],
+        correct: 2,
+        explanation: "Che tài liệu và tự nhớ câu trả lời là hình thức truy xuất thông tin chủ động kinh điển, mang lại hiệu quả vượt trội so với tiếp nhận thụ động."
+      },
+      {
+        round: "Round 2 – Tư Duy",
+        roundTheme: "indigo",
+        timeLimit: 20,
+        question: "Câu 7. Một sinh viên muốn ghi nhớ kiến thức trong thời gian dài. Chiến lược nào dưới đây là phù hợp nhất?",
+        options: [
+          "Học toàn bộ kiến thức chỉ trong một đêm.",
+          "Ôn tập kiến thức theo những khoảng thời gian hợp lý và kết hợp Active Recall.",
+          "Đọc đi đọc lại cùng một trang sách liên tục.",
+          "Chỉ học khi sắp đến kỳ thi."
+        ],
+        correct: 1,
+        explanation: "Kết hợp Spaced Repetition (Lặp lại ngắt quãng) và Active Recall (Chủ động truy xuất) là bộ đôi vàng trong khoa học nhận thức giúp ghi nhớ bền vững."
+      },
+      {
+        round: "Round 3 – Chung Kết",
+        roundTheme: "fuchsia",
+        timeLimit: 20,
+        question: "Câu 8. Một sinh viên che phần ghi chép chính và sử dụng các câu hỏi ở cột từ khóa để tự trả lời. Bạn ấy đang áp dụng phương pháp nào?",
+        options: [
+          "Sơ đồ tư duy (Mind Mapping).",
+          "Ghi nhớ chủ động (Active Recall).",
+          "Đọc thụ động (Passive Reading).",
+          "Đọc nhanh (Speed Reading)."
+        ],
+        correct: 1,
+        explanation: "Hành động che câu trả lời và tự truy xuất nội dung từ trí não chính là bản chất của phương pháp Ghi nhớ chủ động (Active Recall)."
+      },
+      {
+        round: "Round 3 – Chung Kết",
+        roundTheme: "fuchsia",
+        timeLimit: 20,
+        question: "Câu 9. Nhận định nào sau đây là ĐÚNG về việc học tập hiệu quả?",
+        options: [
+          "Ghi chép càng nhiều thì học tập càng hiệu quả.",
+          "Đọc đi đọc lại tài liệu đảm bảo ghi nhớ lâu dài.",
+          "Hiểu, hệ thống hóa và chủ động truy xuất thông tin giúp nâng cao hiệu quả học tập.",
+          "Học thuộc mà không cần hiểu là chiến lược tốt nhất."
+        ],
+        correct: 2,
+        explanation: "Học tập hiệu quả đòi hỏi sự kết hợp giữa hiểu sâu, tổ chức cấu trúc tư duy logic và thường xuyên rèn luyện khả năng truy xuất."
+      },
+      {
+        round: "Round 3 – Chung Kết",
+        roundTheme: "fuchsia",
+        timeLimit: 20,
+        question: "Câu 10. Mục tiêu cuối cùng của việc kết hợp Cornell Notes và Active Recall là gì?",
+        options: [
+          "Tạo ra những cuốn vở ghi chép đẹp mắt.",
+          "Ghi lại từng lời giảng của giáo viên.",
+          "Xây dựng một hệ thống giúp tổ chức, ôn tập và truy xuất kiến thức hiệu quả.",
+          "Dành nhiều thời gian hơn cho việc học."
+        ],
+        correct: 2,
+        explanation: "Sự kết hợp giữa Cornell (tổ chức & tóm tắt khoa học) và Active Recall (tự kiểm tra & củng cố trí nhớ) tạo nên một hệ thống tự học hoàn chỉnh, tối ưu thời gian."
+      }
+    ];
+
+    // App State
+    let currentIndex = 0;
+    let score = 0;
+    let correctAnswersCount = 0;
+    let timer = null;
+    let timeLeft = 0;
+    let answered = false;
+
+    // Elements
+    const startScreen = document.getElementById("start-screen");
+    const quizScreen = document.getElementById("quiz-screen");
+    const resultScreen = document.getElementById("result-screen");
+
+    const startBtn = document.getElementById("start-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const restartBtn = document.getElementById("restart-btn");
+
+    const roundBadge = document.getElementById("round-badge");
+    const questionProgress = document.getElementById("question-progress");
+    const scoreCounter = document.getElementById("score-counter");
+    const timerText = document.getElementById("timer-text");
+    const timerProgress = document.getElementById("timer-progress");
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const feedbackCard = document.getElementById("feedback-card");
+    const feedbackTitle = document.getElementById("feedback-title");
+    const feedbackDesc = document.getElementById("feedback-desc");
+
+    const finalScore = document.getElementById("final-score");
+    const accuracyRate = document.getElementById("accuracy-rate");
+    const resultEval = document.getElementById("result-eval");
+    const resultTrophy = document.getElementById("result-trophy");
+
+    // Start Game
+    startBtn.addEventListener("click", () => {
+      startScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+      currentIndex = 0;
+      score = 0;
+      correctAnswersCount = 0;
+      loadQuestion();
+    });
+
+    // Restart Game
+    restartBtn.addEventListener("click", () => {
+      resultScreen.classList.add("hidden");
+      startScreen.classList.remove("hidden");
+    });
+
+    // Next Question
+    nextBtn.addEventListener("click", () => {
+      if (!answered) return;
+      currentIndex++;
+      if (currentIndex < quizData.length) {
+        loadQuestion();
+      } else {
+        showResults();
+      }
+    });
+
+    function loadQuestion() {
+      answered = false;
+      clearInterval(timer);
+
+      const q = quizData[currentIndex];
+      timeLeft = q.timeLimit;
+
+      // Update Progress & Badges
+      roundBadge.textContent = q.round;
+      questionProgress.textContent = `Câu ${currentIndex + 1}/${quizData.length}`;
+      scoreCounter.textContent = `${score} điểm`;
+      questionText.textContent = q.question;
+
+      // Reset feedback and Next button
+      feedbackCard.classList.add("hidden");
+      nextBtn.disabled = true;
+      nextBtn.classList.add("opacity-50", "cursor-not-allowed");
+      nextBtn.classList.remove("bg-indigo-600", "text-white", "hover:bg-indigo-500");
+      nextBtn.classList.add("bg-slate-800", "text-slate-300");
+
+      // Render Options
+      optionsContainer.innerHTML = "";
+      const letters = ["A", "B", "C", "D"];
+      q.options.forEach((opt, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "w-full text-left p-4 rounded-2xl bg-slate-800/80 hover:bg-slate-800 border border-slate-700/80 hover:border-slate-600 transition flex items-center gap-3 text-sm sm:text-base font-medium group";
+        btn.innerHTML = `
+          <span class="w-8 h-8 flex-shrink-0 rounded-xl bg-slate-700/50 group-hover:bg-indigo-600/30 text-slate-300 group-hover:text-indigo-300 flex items-center justify-center font-bold text-xs border border-slate-600 group-hover:border-indigo-500/40">
+            ${letters[idx]}
+          </span>
+          <span class="text-slate-200">${opt}</span>
+        `;
+        btn.onclick = () => selectAnswer(idx);
+        optionsContainer.appendChild(btn);
+      });
+
+      // Start Countdown
+      updateTimerDisplay();
+      timer = setInterval(() => {
+        timeLeft -= 0.1;
+        if (timeLeft <= 0) {
+          timeLeft = 0;
+          updateTimerDisplay();
+          clearInterval(timer);
+          handleTimeOut();
+        } else {
+          updateTimerDisplay();
+        }
+      }, 100);
+    }
+
+    function updateTimerDisplay() {
+      const q = quizData[currentIndex];
+      const percent = (timeLeft / q.timeLimit) * 100;
+      timerText.textContent = `${Math.ceil(timeLeft)}s`;
+      timerProgress.style.width = `${percent}%`;
+
+      if (percent < 30) {
+        timerProgress.className = "h-full transition-all duration-100 ease-linear bg-rose-500";
+      } else if (percent < 60) {
+        timerProgress.className = "h-full transition-all duration-100 ease-linear bg-amber-400";
+      } else {
+        timerProgress.className = "h-full transition-all duration-100 ease-linear bg-cyan-400";
+      }
+    }
+
+    function selectAnswer(selectedIndex) {
+      if (answered) return;
+      answered = true;
+      clearInterval(timer);
+
+      const q = quizData[currentIndex];
+      const buttons = optionsContainer.querySelectorAll("button");
+
+      buttons.forEach((btn, idx) => {
+        btn.disabled = true;
+        btn.classList.remove("hover:bg-slate-800", "hover:border-slate-600");
+        
+        if (idx === q.correct) {
+          btn.className = "w-full text-left p-4 rounded-2xl bg-emerald-950/60 border border-emerald-500/80 text-emerald-200 flex items-center gap-3 text-sm sm:text-base font-medium";
+          btn.children[0].className = "w-8 h-8 flex-shrink-0 rounded-xl bg-emerald-500 text-slate-950 flex items-center justify-center font-bold text-xs";
+        } else if (idx === selectedIndex) {
+          btn.className = "w-full text-left p-4 rounded-2xl bg-rose-950/60 border border-rose-500/80 text-rose-200 flex items-center gap-3 text-sm sm:text-base font-medium";
+          btn.children[0].className = "w-8 h-8 flex-shrink-0 rounded-xl bg-rose-500 text-slate-950 flex items-center justify-center font-bold text-xs";
+        } else {
+          btn.classList.add("opacity-40");
+        }
+      });
+
+      // Show Feedback
+      feedbackCard.classList.remove("hidden");
+      if (selectedIndex === q.correct) {
+        const timeBonus = Math.round(timeLeft * 5);
+        const gained = 100 + timeBonus;
+        score += gained;
+        correctAnswersCount++;
+        feedbackCard.className = "p-4 rounded-2xl border bg-emerald-950/30 border-emerald-500/40 text-emerald-200 block";
+        feedbackTitle.textContent = `🎉 Chính xác! (+${gained} điểm)`;
+      } else {
+        feedbackCard.className = "p-4 rounded-2xl border bg-rose-950/30 border-rose-500/40 text-rose-200 block";
+        feedbackTitle.textContent = "❌ Chưa chính xác!";
+      }
+      feedbackDesc.textContent = q.explanation;
+      scoreCounter.textContent = `${score} điểm`;
+
+      enableNext();
+    }
+
+    function handleTimeOut() {
+      if (answered) return;
+      answered = true;
+
+      const q = quizData[currentIndex];
+      const buttons = optionsContainer.querySelectorAll("button");
+
+      buttons.forEach((btn, idx) => {
+        btn.disabled = true;
+        if (idx === q.correct) {
+          btn.className = "w-full text-left p-4 rounded-2xl bg-emerald-950/60 border border-emerald-500/80 text-emerald-200 flex items-center gap-3 text-sm sm:text-base font-medium";
+        } else {
+          btn.classList.add("opacity-40");
+        }
+      });
+
+      feedbackCard.classList.remove("hidden");
+      feedbackCard.className = "p-4 rounded-2xl border bg-amber-950/30 border-amber-500/40 text-amber-200 block";
+      feedbackTitle.textContent = "⏰ Hết giờ!";
+      feedbackDesc.textContent = q.explanation;
+
+      enableNext();
+    }
+
+    function enableNext() {
+      nextBtn.disabled = false;
+      nextBtn.classList.remove("opacity-50", "cursor-not-allowed", "bg-slate-800", "text-slate-300");
+      nextBtn.classList.add("bg-indigo-600", "text-white", "hover:bg-indigo-500", "shadow-lg", "shadow-indigo-600/30");
+    }
+
+    function showResults() {
+      quizScreen.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+
+      const accuracy = Math.round((correctAnswersCount / quizData.length) * 100);
+      finalScore.textContent = score;
+      accuracyRate.textContent = `${accuracy}% (${correctAnswersCount}/10)`;
+
+      if (accuracy >= 90) {
+        resultTrophy.textContent = "👑";
+        resultEval.textContent = "Xuất sắc! Bạn đã nắm vững và kết hợp nhuần nhuyễn phương pháp Cornell cùng Active Recall!";
+      } else if (accuracy >= 70) {
+        resultTrophy.textContent = "🌟";
+        resultEval.textContent = "Rất tốt! Bạn hiểu rõ cơ chế và giá trị của việc chủ động học tập.";
+      } else {
+        resultTrophy.textContent = "📚";
+        resultEval.textContent = "Hãy ôn tập lại cách ứng dụng cột từ khóa và thói quen tự truy xuất kiến thức để bứt phá hơn nhé!";
+      }
+    }
+  </script>
+</body>
+</html>
